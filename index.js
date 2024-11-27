@@ -41,7 +41,7 @@ async function run() {
     // AUTHENTICATION SECTION
     // Signup route
     app.post("/signup", async (req, res) => {
-      const { fullName, imageUrl, email, password } = req.body;
+      const { fullName, imageUrl, email, password, role } = req.body;
       //  console.log(newUser);
 
       // Hash the password
@@ -52,6 +52,7 @@ async function run() {
         imageUrl,
         email,
         password: hashedPassword, // Store the hashed password
+        role,
       };
       const result = await userCollection.insertOne(newUser);
       res.send({
@@ -167,27 +168,82 @@ async function run() {
     });
     // PRODUCT SECTION END
 
-    // ORDER SECTION SRART
-    // Create Order
-    app.post("/order", async (req, res) => {
-      const newOrder = req.body;
+    // Cart SECTION SRART
+    // Order product to cart
+    app.post("/create-order", async (req, res) => {
+      const {
+        productId,
+        name,
+        thumbnail,
+        price,
+        ratingCount,
+        category,
+        email,
+      } = req.body;
+      const newOrder = {
+        productId,
+        name,
+        thumbnail,
+        price,
+        ratingCount,
+        category,
+        email,
+      };
+      console.log(newOrder);
 
       const result = await orderCollection.insertOne(newOrder);
       res.send({
         data: result,
         status: 200,
-        message: "Product Ordered successfully",
+        message: "Order product successfully to cart",
       });
     });
 
-    // Order-retreive by user email
+    // // Order service to cart
+    // app.post("/order-service", async (req, res) => {
+    //   const { productId, title, image, price, description, email } = req.body;
+    //   const newOrder = {
+    //     productId,
+    //     title,
+    //     image,
+    //     price,
+    //     description,
+    //     email,
+    //   };
+
+    //   const result = await orderCollection.insertOne(newOrder);
+    //   res.send({
+    //     data: result,
+    //     status: 200,
+    //     message: "Order seervice successfully to cart",
+    //   });
+    // });
+
+    // Cart items-retreive by user email
     app.get("/order-list", async (req, res) => {
-      const { email } = req.body;
+      const { email } = req.query;
+      console.log(email);
       const result = await orderCollection.find({ email: email }).toArray();
       res.send({
         data: result,
         status: 200,
         message: "Order-list created successfully",
+      });
+    });
+
+    // Cart items delete by user email
+    // Delete product
+    app.delete("/order-list/:productId", async (req, res) => {
+      const { productId } = req.params;
+      // console.log(id);
+
+      const result = await orderCollection.deleteOne({
+        _id: new ObjectId(productId),
+      });
+      res.send({
+        data: result,
+        status: 200,
+        message: "Product deleted from cart successfully",
       });
     });
 
